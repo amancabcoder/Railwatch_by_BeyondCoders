@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RailWatch · Encroachment</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  :root{--bg:#0f1419;--panel:#171e26;--panel2:#1e2731;--line:#2b3744;--text:#e6edf3;--mute:#8b9bab;
+    --crit:#e62828;--high:#ff8c00;--med:#ffd700;--low:#aaaaaa;--ok:#3fb950;--accent:#3aa0ff}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.45 system-ui,Segoe UI,Roboto,sans-serif}
+  header{display:flex;align-items:center;gap:12px;padding:10px 18px;border-bottom:1px solid var(--line);background:var(--panel)}
+  header h1{font-size:17px;margin:0}
+  header span{color:var(--mute)}
+  .layout{display:grid;grid-template-columns:300px 1fr;gap:14px;padding:14px;align-items:start}
+  @media(max-width:1000px){.layout{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}
+  .card h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:0 0 10px}
+  label{display:block;font-size:12px;color:var(--mute);margin:8px 0 3px}
+  input,select,textarea,button{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:6px 8px;width:100%}
+  button{cursor:pointer;width:auto}
+  button.primary{background:var(--accent);border-color:var(--accent);color:#06121f;font-weight:600}
+  button:disabled{opacity:.5;cursor:wait}
+  .row{display:flex;gap:8px}.row>*{flex:1}
+  .thumbinfo{font-size:12px;color:var(--mute);margin-top:3px}
+  .err{background:#3a1519;border:1px solid #8a2a33;color:#ffb3ba;padding:8px;border-radius:6px;margin-top:8px;display:none}
+  .badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;font-weight:600}
+  .sev-critical{background:var(--crit)}.sev-high{background:var(--high);color:#201000}.sev-medium{background:var(--med);color:#201a00}.sev-low{background:var(--low);color:#111}
+  .st-pending_review{background:#34404d}.st-verified{background:#1f6f34}.st-dismissed{background:#4a4f55;text-decoration:line-through}
+  .warn{background:#3a2e10;border:1px solid #7a5d12;color:#ffd77a;padding:8px 10px;border-radius:6px;margin-bottom:10px}
+  .okbox{background:#10301b;border:1px solid #1f6f34;color:#9be3ae;padding:8px 10px;border-radius:6px;margin-bottom:10px}
+  .tabs{display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center}
+  .tabs button.on{background:var(--accent);color:#06121f;border-color:var(--accent)}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .compare.swipe{display:block;position:relative}
+  .compare .pane{position:relative}
+  .compare .pane canvas{width:100%;display:block;border-radius:6px;cursor:crosshair}
+  .compare .cap{position:absolute;left:6px;top:6px;background:#000a;padding:2px 8px;border-radius:4px;font-size:12px;pointer-events:none}
+  .compare.swipe .pane.top{position:absolute;inset:0;clip-path:inset(0 50% 0 0)}
+  .compare.swipe .pane.top .cap{left:6px}.compare.swipe .pane.base .cap{left:auto;right:6px}
+  .legend{display:flex;gap:12px;flex-wrap:wrap;margin:8px 0;color:var(--mute);font-size:12px}
+  .legend i{display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:4px;vertical-align:-2px}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);font-size:13px}
+  th{color:var(--mute);font-weight:500}
+  tr.cand{cursor:pointer}tr.cand:hover,tr.cand.sel{background:var(--panel2)}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:1200px){.grid2{grid-template-columns:1fr}}
+  .kv{display:grid;grid-template-columns:150px 1fr;gap:3px 10px;font-size:13px}.kv div:nth-child(odd){color:var(--mute)}
+  #map{height:340px;border-radius:8px}
+  .evid{width:100%;border-radius:6px;background:#000}
+  .hist{font-size:12px;color:var(--mute);margin-top:8px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  .chip{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 10px}
+  .chip b{font-size:18px;display:block}
+  .alist div{padding:6px 8px;border-radius:6px;cursor:pointer;border:1px solid transparent}
+  .alist div:hover{background:var(--panel2)}.alist div.sel{border-color:var(--accent)}
+  .alist small{color:var(--mute);display:block}
+  .stack>*+*{margin-top:14px}
+  .empty{color:var(--mute);padding:40px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <svg width="30" height="22" viewBox="0 0 30 22" aria-hidden="true"><g stroke="#e6edf3" stroke-width="2"><line x1="0" y1="6" x2="30" y2="6"/><line x1="0" y1="16" x2="30" y2="16"/></g><g stroke="#8b9bab" stroke-width="3"><line x1="4" y1="2" x2="4" y2="20"/><line x1="12" y1="2" x2="12" y2="20"/><line x1="20" y1="2" x2="20" y2="20"/><line x1="28" y1="2" x2="28" y2="20"/></g></svg>
+  <h1>RailWatch · Encroachment detection</h1><span>before / after imagery → candidates → human review</span>
+</header>
+
+<div class="layout">
+  <aside class="stack">
+    <div class="card">
+      <h2>New analysis</h2>
+      <label>Railway section</label>
+      <select id="section"></select>
+      <div class="thumbinfo" id="secinfo"></div>
+      <label>Before image</label><input type="file" id="fbefore" accept="image/*">
+      <div class="thumbinfo" id="ibefore"></div>
+      <div class="row"><div><label>Date</label><input type="date" id="dbefore"></div><div><label>Source</label><input id="sbefore" placeholder="e.g. Google Earth"></div></div>
+      <label>After image</label><input type="file" id="fafter" accept="image/*">
+      <div class="thumbinfo" id="iafter"></div>
+      <div class="row"><div><label>Date</label><input type="date" id="dafter"></div><div><label>Source</label><input id="safter" placeholder="e.g. Google Earth"></div></div>
+      <div class="row"><div><label>Monitoring buffer (m)</label><input type="number" id="buffer" min="5" max="500" value="30"></div></div>
+      <label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="useBoundary" style="width:auto"> Use section boundary polygon (if available)</label>
+      <div class="row" style="margin-top:10px">
+        <button class="primary" id="run">Run analysis</button>
+        <button id="demo">Run demo pair</button>
+      </div>
+      <div class="err" id="err"></div>
+      <div class="thumbinfo">Both images must cover the same area as the selected section (the pipeline checks this).</div>
+    </div>
+    <div class="card"><h2>Analyses</h2><div class="alist" id="alist"></div></div>
+  </aside>
+
+  <main class="stack" id="main"><div class="card empty">Run the demo pair or upload two dated images to start.</div></main>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const SEV={critical:'#e62828',high:'#ff8c00',medium:'#ffd700',low:'#aaaaaa'};
+const SEVL={critical:'Critical',high:'High',medium:'Medium',low:'Low'};
+const STL={pending_review:'Pending review',verified:'Verified',dismissed:'Dismissed'};
+const $=id=>document.getElementById(id);
+let sections=[], cur=null, selected=null, imgs={}, mode='side', layers={track:true,zone:true,cands:true,veg:true}, filter='all', map=null, mapLayer=null;
+
+async function api(url,opts){
+  const r=await fetch(url,opts); const j=await r.json().catch(()=>({}));
+  if(!r.ok) throw new Error(j.error?.message||('Request failed ('+r.status+')'));
+  return j;
+}
+function showErr(m){const e=$('err');e.textContent=m;e.style.display=m?'block':'none'}
+
+// ---------- form
+async function init(){
+  sections=await api('/api/sections');
+  $('section').innerHTML=sections.map(s=>`<option value="${s.id}">${s.name}</option>`).join('');
+  $('section').onchange=secInfo; secInfo();
+  fileInfo('fbefore','ibefore'); fileInfo('fafter','iafter');
+  $('run').onclick=runUpload; $('demo').onclick=runDemo;
+  await loadList();
+  const l=await api('/api/analyses'); if(l.length) open(l[0].id);
+}
+function secInfo(){
+  const s=sections.find(x=>x.id===$('section').value); if(!s) return;
+  $('buffer').value=s.default_buffer_m;
+  $('secinfo').textContent=`Area: ${s.bounds.west},${s.bounds.south} → ${s.bounds.east},${s.bounds.north}. Boundary: ${s.boundary?(s.boundary_verified?'verified':'unverified sample'):'none (buffer only)'}`;
+  $('useBoundary').disabled=!s.boundary;
+}
+function fileInfo(inp,out){
+  $(inp).onchange=()=>{const f=$(inp).files[0]; if(!f){$(out).textContent='';return}
+    const im=new Image(); im.onload=()=>{$(out).textContent=`${f.name} · ${im.naturalWidth}×${im.naturalHeight}px · ${(f.size/1e6).toFixed(1)} MB`}; im.src=URL.createObjectURL(f)};
+}
+async function runUpload(){
+  showErr('');
+  const fb=$('fbefore').files[0], fa=$('fafter').files[0];
+  if(!fb||!fa) return showErr('Choose both a before and an after image.');
+  if(!$('dbefore').value||!$('dafter').value) return showErr('Enter the capture date of both images.');
+  const fd=new FormData();
+  fd.append('before',fb);fd.append('after',fa);fd.append('section_id',$('section').value);
+  fd.append('before_date',$('dbefore').value);fd.append('after_date',$('dafter').value);
+  fd.append('before_source',$('sbefore').value);fd.append('after_source',$('safter').value);
+  fd.append('buffer_m',$('buffer').value);fd.append('use_boundary',$('useBoundary').checked);
+  await go(()=>api('/api/analyses',{method:'POST',body:fd}));
+}
+async function runDemo(){
+  showErr('');
+  await go(()=>api('/api/analyses/demo',{method:'POST',headers:{'content-type':'application/json'},
+    body:JSON.stringify({section_id:$('section').value,buffer_m:Number($('buffer').value),use_boundary:$('useBoundary').checked})}));
+}
+async function go(fn){
+  $('run').disabled=$('demo').disabled=true; const t=$('run').textContent; $('run').textContent='Analysing…';
+  try{const r=await fn(); await loadList(); await open(r.analysis.id);}catch(e){showErr(e.message)}
+  finally{$('run').disabled=$('demo').disabled=false;$('run').textContent=t}
+}
+async function loadList(){
+  const l=await api('/api/analyses');
+  $('alist').innerHTML=l.length?l.map(a=>`<div data-id="${a.id}" class="${cur&&cur.analysis.id===a.id?'sel':''}">${a.before.date} → ${a.after.date}<small>${a.section_name}<br>${a.summary.candidates} candidates · ${a.summary.flagged} flagged</small></div>`).join(''):'<div class="thumbinfo">None yet</div>';
+  [...$('alist').children].forEach(d=>d.onclick=()=>open(d.dataset.id));
+}
+async function open(id){
+  cur=await api('/api/analyses/'+id); selected=cur.candidates[0]?.id||null; imgs={};
+  const base=`/files/${id}/`, f=cur.analysis.files;
+  await Promise.all([['before',f.before],['after',f.after_aligned],['heat',f.heatmap]].map(([k,p])=>new Promise(res=>{const im=new Image();im.onload=()=>{imgs[k]=im;res()};im.src=base+p})));
+  render(); loadList();
+}
+
+// ---------- drawing
+function drawCorridor(ctx,a){
+  const c=a.corridor, mpp=a.before.resolution_m_per_px, lw=Math.max(2,ctx.canvas.width/450);
+  if(layers.zone){
+    ctx.save();
+    if(c.boundary_px){ctx.beginPath();c.boundary_px.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.closePath();
+      ctx.fillStyle='rgba(255,120,0,.12)';ctx.fill();ctx.strokeStyle='#ff7a00';ctx.lineWidth=lw;ctx.setLineDash([lw*4,lw*3]);ctx.stroke();}
+    else if(c.track_px){ctx.globalAlpha=.14;ctx.strokeStyle='#00c8ff';ctx.lineJoin='round';ctx.lineCap='butt';ctx.lineWidth=2*c.buffer_m/mpp;
+      ctx.beginPath();c.track_px.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();ctx.globalAlpha=1;
+      ctx.lineWidth=lw;ctx.setLineDash([lw*4,lw*3]);ctx.strokeStyle='#00c8ff';
+      for(const s of [-1,1]){ctx.beginPath();offsetLine(c.track_px,s*c.buffer_m/mpp).forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();}}
+    ctx.restore();
+  }
+  if(layers.track&&c.track_px){ctx.save();ctx.lineWidth=lw*2.2;ctx.strokeStyle='#ffff00';ctx.beginPath();c.track_px.forEach(([x,y],i)=>i?ctx.lineTo(x,y):ctx.moveTo(x,y));ctx.stroke();
+    ctx.lineWidth=lw*.6;ctx.strokeStyle='#000';ctx.stroke();ctx.restore();}
+}
+function offsetLine(pts,d){return pts.map((p,i)=>{const a=pts[Math.max(0,i-1)],b=pts[Math.min(pts.length-1,i+1)];
+  let dx=b[0]-a[0],dy=b[1]-a[1];const L=Math.hypot(dx,dy)||1;return [p[0]-dy/L*d,p[1]+dx/L*d]})}
+function drawBoxes(ctx,withLabels){
+  const lw=Math.max(3,ctx.canvas.width/330), fs=Math.max(12,ctx.canvas.width/55);
+  if(layers.veg) for(const v of cur.analysis.vegetation.new_vegetation_regions){const [x,y,w,h]=v.bbox_px;ctx.strokeStyle='#3fb950';ctx.lineWidth=lw*.8;ctx.setLineDash([lw*2,lw]);ctx.strokeRect(x,y,w,h);ctx.setLineDash([]);
+    if(withLabels){label(ctx,'veg',x,y,'#2a7d3a',fs)}}
+  if(!layers.cands) return;
+  for(const c of visible()){const [x,y,w,h]=c.bbox_px;const sel=c.id===selected;
+    ctx.strokeStyle=SEV[c.severity];ctx.lineWidth=sel?lw*1.8:lw;ctx.strokeRect(x,y,w,h);
+    if(c.status==='dismissed'){ctx.globalAlpha=.5}
+    if(withLabels) label(ctx,`#${c.index} ${SEVL[c.severity]}${c.distance_to_track_m!=null?' '+Math.round(c.distance_to_track_m)+'m':''}${c.status==='verified'?' ✓':''}`,x,y,SEV[c.severity],fs,c.severity==='medium'||c.severity==='high');
+    ctx.globalAlpha=1;
+    if(sel){ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.setLineDash([4,4]);ctx.strokeRect(x-6,y-6,w+12,h+12);ctx.setLineDash([])}}
+}
+function label(ctx,t,x,y,col,fs,dark){ctx.font=`600 ${fs}px system-ui`;const w=ctx.measureText(t).width+8;const yy=Math.max(fs+6,y);
+  ctx.fillStyle=col;ctx.fillRect(x,yy-fs-6,w,fs+6);ctx.fillStyle=dark?'#111':'#fff';ctx.fillText(t,x+4,yy-5)}
+function visible(){return cur.candidates.filter(c=>filter==='all'||c.status===filter)}
+function paint(){
+  for(const [id,key,cap] of [['cb','before','Before · '+cur.analysis.before.date],['ca','after','After · '+cur.analysis.after.date]]){
+    const cv=$(id),im=key==='before'?imgs.before:(mode==='heat'?imgs.heat:imgs.after);cv.width=im.width;cv.height=im.height;
+    const ctx=cv.getContext('2d');ctx.drawImage(im,0,0);drawCorridor(ctx,cur.analysis);drawBoxes(ctx,key==='after');
+  }
+}
+
+// ---------- render
+function render(){
+  const a=cur.analysis,c=cur.candidates,s=a.summary,corr=a.corridor,v=a.validation.alignment;
+  const approx=corr.basis!=='verified_boundary';
+  $('main').innerHTML=`
+  <div class="card">
+    <div class="${approx?'warn':'okbox'}"><b>Corridor:</b> ${corr.label}</div>
+    <div class="chips">
+      <div class="chip"><b>${s.candidates}</b>candidates</div>
+      ${['critical','high','medium','low'].map(k=>`<div class="chip"><b style="color:${SEV[k]}">${s.by_severity[k]}</b>${SEVL[k]}</div>`).join('')}
+      <div class="chip"><b>${a.vegetation.vegetation_pct_before}% → ${a.vegetation.vegetation_pct_after}%</b>vegetation in corridor</div>
+    </div>
+    <div class="tabs">
+      <button data-m="side" class="${mode==='side'?'on':''}">Side by side</button>
+      <button data-m="swipe" class="${mode==='swipe'?'on':''}">Swipe</button>
+      <button data-m="heat" class="${mode==='heat'?'on':''}">Change heatmap</button>
+      <span style="flex:1"></span>
+      ${[['track','Track'],['zone','Corridor'],['cands','Buildings'],['veg','Vegetation']].map(([k,n])=>`<label style="display:inline-flex;gap:4px;margin:0;color:var(--text)"><input type="checkbox" style="width:auto" data-l="${k}" ${layers[k]?'checked':''}>${n}</label>`).join('')}
+    </div>
+    <div class="compare ${mode==='swipe'?'swipe':''}" id="cmp">
+      <div class="pane base"><canvas id="ca"></canvas><span class="cap">After · ${a.after.date}</span></div>
+      <div class="pane top" id="topPane"><canvas id="cb"></canvas><span class="cap">Before · ${a.before.date}</span></div>
+    </div>
+    ${mode==='swipe'?'<input type="range" id="sw" min="0" max="100" value="50" style="margin-top:8px">':''}
+    <div class="legend"><span><i style="background:${SEV.critical}"></i>Critical (inside land / very close)</span><span><i style="background:${SEV.high}"></i>High</span><span><i style="background:${SEV.medium}"></i>Medium</span><span><i style="background:${SEV.low}"></i>Low</span><span><i style="background:#3fb950"></i>New vegetation</span><span><i style="background:#ffff00"></i>Track</span><span>Click a box to inspect</span></div>
+  </div>
+  <div class="grid2">
+    <div class="card">
+      <h2>Candidates</h2>
+      <div class="tabs">${['all','pending_review','verified','dismissed'].map(f=>`<button data-f="${f}" class="${filter===f?'on':''}">${f==='all'?'All':STL[f]} (${f==='all'?c.length:c.filter(x=>x.status===f).length})</button>`).join('')}</div>
+      <table><thead><tr><th>#</th><th>Severity</th><th>Type</th><th>Dist. to track</th><th>Area</th><th>Status</th></tr></thead>
+      <tbody>${visible().map(x=>`<tr class="cand ${x.id===selected?'sel':''}" data-id="${x.id}"><td>${x.index}</td><td><span class="badge sev-${x.severity}">${SEVL[x.severity]}</span></td><td>${x.type}</td><td>${x.distance_to_track_m??'–'} m</td><td>${Math.round(x.area_m2)} m²</td><td><span class="badge st-${x.status}">${STL[x.status]}</span></td></tr>`).join('')||'<tr><td colspan="6" class="thumbinfo">Nothing in this filter</td></tr>'}</tbody></table>
+    </div>
+    <div class="card" id="detail"></div>
+  </div>
+  <div class="grid2">
+    <div class="card"><h2>Map</h2><div id="map"></div></div>
+    <div class="card"><h2>Imagery &amp; validation</h2>
+      <div class="okbox">Same area confirmed · ${v.inliers} matched features (${Math.round(v.inlier_ratio*100)}% consistent), overlap ${Math.round(v.overlap_fraction*100)}%, alignment error ${v.rms_error_px}px</div>
+      <div class="kv">
+        <div>Before</div><div>${a.before.date} · ${a.before.source||'–'} · ${a.before.size_px.join('×')}px · ${a.before.resolution_m_per_px} m/px</div>
+        <div>After</div><div>${a.after.date} · ${a.after.source||'–'} · ${a.after.size_px.join('×')}px · ${a.after.resolution_m_per_px??'–'} m/px</div>
+        <div>Method</div><div>${v.method}; after image warped onto before image, colours matched</div>
+        <div>Change threshold</div><div>${a.params.threshold_used} (LAB units)</div>
+        <div>Filtered out</div><div>${Object.entries(s.rejected_filters).map(([k,n])=>k.replace(/_/g,' ')+': '+n).join(' · ')}</div>
+      </div>
+      <p class="thumbinfo">Resolution decides what can be seen: at 0.5 m/px a small hut (~20 m²) is only ~80 pixels. Coarse satellite imagery (≥1 m/px) will miss small or partial structures — see README.</p>
+    </div>
+  </div>`;
+  document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{mode=b.dataset.m;render()});
+  document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{filter=b.dataset.f;render()});
+  document.querySelectorAll('[data-l]').forEach(b=>b.onchange=()=>{layers[b.dataset.l]=b.checked;paint()});
+  document.querySelectorAll('tr.cand').forEach(r=>r.onclick=()=>select(r.dataset.id));
+  const sw=$('sw'); if(sw) sw.oninput=()=>{$('topPane').style.clipPath=`inset(0 ${100-sw.value}% 0 0)`};
+  for(const id of ['ca','cb']) $(id).onclick=e=>pick(e,$(id));
+  paint(); renderDetail(); drawMap();
+}
+function pick(e,cv){
+  const r=cv.getBoundingClientRect(),x=(e.clientX-r.left)*cv.width/r.width,y=(e.clientY-r.top)*cv.height/r.height;
+  const hit=visible().find(c=>{const [bx,by,w,h]=c.bbox_px;return x>=bx-6&&x<=bx+w+6&&y>=by-6&&y<=by+h+6}); if(hit) select(hit.id);
+}
+function select(id){selected=id;render()}
+function renderDetail(){
+  const c=cur.candidates.find(x=>x.id===selected), a=cur.analysis, d=$('detail');
+  if(!c){d.innerHTML='<h2>Evidence</h2><div class="thumbinfo">Select a candidate.</div>';return}
+  const ll=c.centroid_lonlat;
+  d.innerHTML=`<h2>Evidence · candidate #${c.index}</h2>
+  <img class="evid" src="/files/${a.id}/${c.evidence_image}" alt="before and after crop">
+  <div class="thumbinfo">Left: ${a.before.date} · Right: ${a.after.date} (box = detected change)</div>
+  <div class="kv" style="margin-top:8px">
+    <div>Severity</div><div><span class="badge sev-${c.severity}">${SEVL[c.severity]}</span> ${c.flagged?'· flagged for inspection':''}</div>
+    <div>Type</div><div>${c.type==='new'?'New structure':'Expansion of existing structure'}</div>
+    <div>Coordinates</div><div>${ll?`${ll[1].toFixed(6)}, ${ll[0].toFixed(6)}`:'–'} ${ll?`<a style="color:var(--accent)" target="_blank" rel="noopener" href="https://www.google.com/maps?q=${ll[1]},${ll[0]}&t=k">open in Maps</a>`:''}</div>
+    <div>Distance to track</div><div>${c.distance_to_track_m??'–'} m ${c.inside_boundary===true?'· inside boundary':c.in_monitoring_zone?'· inside monitoring buffer':''}</div>
+    <div>Footprint</div><div>${Math.round(c.area_m2)} m² · box ${c.bbox_px[2]}×${c.bbox_px[3]} px</div>
+    <div>Evidence</div><div>mean colour change ${c.mean_change}, rectangularity ${c.rectangularity}, building score ${c.building_score}</div>
+    <div>Imagery dates</div><div>${a.before.date} → ${a.after.date}</div>
+    <div>Corridor basis</div><div>${a.corridor.basis==='verified_boundary'?'Verified boundary':a.corridor.basis==='unverified_boundary'?'Unverified boundary':'Approximate buffer'}</div>
+    <div>Status</div><div><span class="badge st-${c.status}">${STL[c.status]}</span>${c.reviewed_at?` · ${c.reviewer}, ${c.reviewed_at.slice(0,16).replace('T',' ')}`:''}</div>
+  </div>
+  <label>Review note</label><textarea id="note" rows="2" maxlength="1000">${(c.note||'').replace(/</g,'&lt;')}</textarea>
+  <div class="row" style="margin-top:8px">
+    <button class="primary" data-s="verified">Verify encroachment</button>
+    <button data-s="dismissed">Dismiss</button>
+    <button data-s="pending_review">Reset</button>
+  </div>
+  <div class="hist">${c.history.map(h=>`${h.at.slice(0,16).replace('T',' ')} · ${h.event}${h.event==='review'?' → '+STL[h.status]+(h.note?' ('+h.note.replace(/</g,'&lt;')+')':''):''}`).join('<br>')}</div>`;
+  d.querySelectorAll('[data-s]').forEach(b=>b.onclick=async()=>{
+    try{const u=await api('/api/candidates/'+c.id,{method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify({status:b.dataset.s,note:$('note').value})});
+      Object.assign(c,u);render()}catch(e){alert(e.message)}});
+}
+function drawMap(){
+  if(map){map.remove();map=null}
+  if(typeof L==='undefined'){$('map').innerHTML='<div class="thumbinfo" style="padding:12px">Map library could not load (offline?).</div>';return}
+  const a=cur.analysis,b=a.before.bounds; if(!b) return;
+  map=L.map('map');
+  const osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'});
+  const sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Esri World Imagery'});
+  osm.addTo(map);L.control.layers({OpenStreetMap:osm,Satellite:sat}).addTo(map);
+  map.fitBounds([[b.south,b.west],[b.north,b.east]]);
+  const c=a.corridor, ll=p=>[p[1],p[0]];
+  (c.zone_lonlat||[]).forEach(z=>L.polygon(z.map(ll),{color:c.basis==='approximate_buffer'?'#00a8d6':'#ff7a00',dashArray:'6 6',weight:2,fillOpacity:.08}).addTo(map));
+  if(c.track_lonlat) L.polyline(c.track_lonlat.map(ll),{color:'#222',weight:5}).addTo(map), L.polyline(c.track_lonlat.map(ll),{color:'#ffeb3b',weight:2}).addTo(map);
+  cur.candidates.forEach(x=>{if(!x.centroid_lonlat)return;
+    const m=L.circleMarker(ll(x.centroid_lonlat),{radius:x.id===selected?11:8,color:'#fff',weight:2,fillColor:SEV[x.severity],fillOpacity:1}).addTo(map);
+    m.bindTooltip(`#${x.index} ${SEVL[x.severity]} · ${STL[x.status]}`);m.on('click',()=>select(x.id))});
+}
+init().catch(e=>showErr(e.message));
+</script>
+</body>
+</html>

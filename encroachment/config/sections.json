@@ -1,0 +1,87 @@
+[
+  {
+    "id": "tilak-bridge-demo",
+    "name": "Tilak Bridge section (Delhi) - DEMO, synthetic imagery",
+    "bounds": {
+      "west": 77.236,
+      "east": 77.2412,
+      "north": 28.63,
+      "south": 28.6258
+    },
+    "track": [
+      [
+        77.236,
+        28.62769
+      ],
+      [
+        77.23718181818182,
+        28.627795
+      ],
+      [
+        77.23845818181819,
+        28.62797875
+      ],
+      [
+        77.23978181818183,
+        28.628162500000002
+      ],
+      [
+        77.2412,
+        28.62824125
+      ]
+    ],
+    "boundary": [
+      [
+        77.236,
+        28.6279
+      ],
+      [
+        77.23741818181819,
+        28.628005
+      ],
+      [
+        77.23845818181819,
+        28.62818875
+      ],
+      [
+        77.23978181818183,
+        28.6283725
+      ],
+      [
+        77.2412,
+        28.62845125
+      ],
+      [
+        77.2412,
+        28.62803125
+      ],
+      [
+        77.23978181818183,
+        28.6279525
+      ],
+      [
+        77.23845818181819,
+        28.62776875
+      ],
+      [
+        77.23718181818182,
+        28.627585
+      ],
+      [
+        77.236,
+        28.627480000000002
+      ]
+    ],
+    "boundary_verified": false,
+    "boundary_source": "hard-coded sample, not an official record",
+    "default_buffer_m": 30,
+    "demo_images": {
+      "before": "data/demo/demo_before_2022.png",
+      "after": "data/demo/demo_after_2026.png",
+      "before_date": "2022-03-15",
+      "after_date": "2026-02-10",
+      "before_source": "Synthetic demo (stand-in for Google Earth historical)",
+      "after_source": "Synthetic demo (stand-in for Google Earth recent)"
+    }
+  }
+]

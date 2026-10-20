@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "RailWatchWebIntelligenceRecord",
+  "type": "object",
+  "properties": {
+    "record_id": {
+      "type": "string",
+      "description": "Unique identifier for the intelligence record"
+    },
+    "provider": {
+      "type": "string",
+      "enum": ["tinyfish", "copernicus", "cwc", "imd", "manual"]
+    },
+    "capability": {
+      "type": "string",
+      "enum": ["TinySearch", "TinyFetch", "TinyAgent", "SatelliteRaster", "CitizenReport"]
+    },
+    "source_url": {
+      "type": "string",
+      "format": "uri"
+    },
+    "publisher": {
+      "type": "string"
+    },
+    "title": {
+      "type": "string"
+    },
+    "published_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "retrieved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "location_text": {
+      "type": "string"
+    },
+    "segment_id": {
+      "type": ["string", "null"]
+    },
+    "topic": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "string"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": ["official_notice", "official_bulletin", "municipal_notice", "media_report", "citizen_photo"]
+    },
+    "verification_status": {
+      "type": "string",
+      "enum": ["pending", "verified", "rejected", "duplicate", "expired"]
+    },
+    "reviewer_id": {
+      "type": ["string", "null"]
+    },
+    "reviewed_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "record_id",
+    "provider",
+    "capability",
+    "source_url",
+    "publisher",
+    "title",
+    "retrieved_at",
+    "verification_status"
+  ]
+}
+

@@ -1,0 +1,231 @@
+[
+  {
+    "id": "DEL-NDLS-01",
+    "name": "NDLS - Tilak Bridge - Yamuna Basin",
+    "corridor": "Northern Railway Main Line (East Entry)",
+    "length_km": 4.8,
+    "status": "warning",
+    "risk_score": 68,
+    "last_inspected": "2026-10-10",
+    "coordinates": [
+      [28.6430, 77.2197],
+      [28.6385, 77.2260],
+      [28.6320, 77.2340],
+      [28.6258, 77.2415],
+      [28.6280, 77.2490],
+      [28.6340, 77.2560]
+    ],
+    "stations": [
+      { "name": "New Delhi (NDLS)", "coords": [28.6430, 77.2197], "type": "terminal" },
+      { "name": "Shivaji Bridge", "coords": [28.6320, 77.2340], "type": "station" },
+      { "name": "Tilak Bridge", "coords": [28.6258, 77.2415], "type": "junction" }
+    ],
+    "metrics": {
+      "vegetation_ndvi": 0.42,
+      "vegetation_status": "Moderate",
+      "flood_waterlogging_index": 78,
+      "flood_status": "High (Yamuna Overflow Basin)",
+      "encroachment_risk": 45,
+      "rainfall_last_24h_mm": 52.4,
+      "water_level_gauge_m": 205.33,
+      "culvert_flow_efficiency": 58
+    },
+    "risk_breakdown": {
+      "vegetation": 15,
+      "flooding": 32,
+      "encroachment": 8,
+      "web_intelligence": 13,
+      "citizen_reports": 0
+    },
+    "alerts": [
+      {
+        "id": "ALT-101",
+        "severity": "high",
+        "title": "Low Culvert Silt Accumulation",
+        "description": "Culvert #14 near Tilak Bridge indicates 42% silt retention following heavy rainfall; backflow risk during peak Yamuna discharge.",
+        "timestamp": "2026-10-13T09:30:00Z"
+      }
+    ]
+  },
+  {
+    "id": "DEL-DLI-01",
+    "name": "Old Delhi - Yamuna Bridge (Loha Pul)",
+    "corridor": "Delhi - Ghaziabad Historic Trunk",
+    "length_km": 3.6,
+    "status": "urgent",
+    "risk_score": 87,
+    "last_inspected": "2026-10-08",
+    "coordinates": [
+      [28.6619, 77.2280],
+      [28.6635, 77.2360],
+      [28.6620, 77.2420],
+      [28.6608, 77.2472],
+      [28.6580, 77.2580]
+    ],
+    "stations": [
+      { "name": "Old Delhi (DLI)", "coords": [28.6619, 77.2280], "type": "terminal" },
+      { "name": "Yamuna Bridge (Loha Pul)", "coords": [28.6608, 77.2472], "type": "historic_bridge" }
+    ],
+    "metrics": {
+      "vegetation_ndvi": 0.28,
+      "vegetation_status": "Low",
+      "flood_waterlogging_index": 92,
+      "flood_status": "Critical (Water Level Near Danger Mark)",
+      "encroachment_risk": 70,
+      "rainfall_last_24h_mm": 68.0,
+      "water_level_gauge_m": 205.85,
+      "culvert_flow_efficiency": 34
+    },
+    "risk_breakdown": {
+      "vegetation": 7,
+      "flooding": 45,
+      "encroachment": 15,
+      "web_intelligence": 20,
+      "citizen_reports": 0
+    },
+    "alerts": [
+      {
+        "id": "ALT-102",
+        "severity": "critical",
+        "title": "Yamuna River Water Exceeds Warning Mark",
+        "description": "Hydrological sensor near Loha Pul reports river level 205.85m (Warning: 204.5m, Danger: 205.33m). Speed restrictions recommended on Bridge 249.",
+        "timestamp": "2026-10-14T06:15:00Z"
+      }
+    ]
+  },
+  {
+    "id": "DEL-NDLS-02",
+    "name": "New Delhi - Sarai Rohilla - Sabzi Mandi",
+    "corridor": "Delhi - Rohtak / Rewari Line",
+    "length_km": 6.2,
+    "status": "normal",
+    "risk_score": 38,
+    "last_inspected": "2026-10-12",
+    "coordinates": [
+      [28.6430, 77.2197],
+      [28.6520, 77.2100],
+      [28.6610, 77.1980],
+      [28.6657, 77.1843],
+      [28.6705, 77.2023]
+    ],
+    "stations": [
+      { "name": "New Delhi (NDLS)", "coords": [28.6430, 77.2197], "type": "terminal" },
+      { "name": "Kishanganj", "coords": [28.6610, 77.1980], "type": "station" },
+      { "name": "Sarai Rohilla (DEE)", "coords": [28.6657, 77.1843], "type": "junction" },
+      { "name": "Sabzi Mandi", "coords": [28.6705, 77.2023], "type": "station" }
+    ],
+    "metrics": {
+      "vegetation_ndvi": 0.64,
+      "vegetation_status": "High (Overgrowth Near OHE Lines)",
+      "flood_waterlogging_index": 25,
+      "flood_status": "Normal",
+      "encroachment_risk": 55,
+      "rainfall_last_24h_mm": 12.0,
+      "water_level_gauge_m": 198.2,
+      "culvert_flow_efficiency": 82
+    },
+    "risk_breakdown": {
+      "vegetation": 24,
+      "flooding": 4,
+      "encroachment": 10,
+      "web_intelligence": 0,
+      "citizen_reports": 0
+    },
+    "alerts": [
+      {
+        "id": "ALT-103",
+        "severity": "medium",
+        "title": "Vegetation Encroachment Near Track Km 8/12",
+        "description": "Satellite NDVI delta indicates sudden canopy expansion along track verge approaching Sarai Rohilla. Pruning cycle due.",
+        "timestamp": "2026-10-11T14:20:00Z"
+      }
+    ]
+  },
+  {
+    "id": "DEL-NZM-01",
+    "name": "Hazrat Nizamuddin - Okhla Industrial Corridor",
+    "corridor": "Delhi - Mathura Main Golden Quadrilateral",
+    "length_km": 7.5,
+    "status": "warning",
+    "risk_score": 58,
+    "last_inspected": "2026-10-09",
+    "coordinates": [
+      [28.5892, 77.2530],
+      [28.5720, 77.2590],
+      [28.5550, 77.2650],
+      [28.5355, 77.2741],
+      [28.5034, 77.2994]
+    ],
+    "stations": [
+      { "name": "Hazrat Nizamuddin (NZM)", "coords": [28.5892, 77.2530], "type": "terminal" },
+      { "name": "Lajpat Nagar Rail Link", "coords": [28.5720, 77.2590], "type": "junction" },
+      { "name": "Okhla (OKA)", "coords": [28.5355, 77.2741], "type": "station" },
+      { "name": "Tughlakabad (TKD)", "coords": [28.5034, 77.2994], "type": "freight_hub" }
+    ],
+    "metrics": {
+      "vegetation_ndvi": 0.35,
+      "vegetation_status": "Moderate",
+      "flood_waterlogging_index": 62,
+      "flood_status": "Moderate (Industrial Drain Backflow)",
+      "encroachment_risk": 68,
+      "rainfall_last_24h_mm": 38.5,
+      "water_level_gauge_m": 201.1,
+      "culvert_flow_efficiency": 50
+    },
+    "risk_breakdown": {
+      "vegetation": 8,
+      "flooding": 22,
+      "encroachment": 18,
+      "web_intelligence": 10,
+      "citizen_reports": 0
+    },
+    "alerts": [
+      {
+        "id": "ALT-104",
+        "severity": "medium",
+        "title": "Barapullah / Okhla Drain Outflow Siltation",
+        "description": "Track inspection note: Municipal drain discharge near Km 12 culvert exhibits sluggish discharge during high tide run-off.",
+        "timestamp": "2026-10-12T11:45:00Z"
+      }
+    ]
+  },
+  {
+    "id": "DEL-ANVR-01",
+    "name": "Anand Vihar - Sahibabad Trans-Yamuna Link",
+    "corridor": "Delhi - Howrah Main Trunk",
+    "length_km": 5.1,
+    "status": "normal",
+    "risk_score": 29,
+    "last_inspected": "2026-10-13",
+    "coordinates": [
+      [28.6502, 77.3153],
+      [28.6580, 77.3270],
+      [28.6650, 77.3400],
+      [28.6740, 77.3550]
+    ],
+    "stations": [
+      { "name": "Anand Vihar Terminal (ANVR)", "coords": [28.6502, 77.3153], "type": "terminal" },
+      { "name": "Chander Nagar", "coords": [28.6580, 77.3270], "type": "station" },
+      { "name": "Sahibabad Jn", "coords": [28.6740, 77.3550], "type": "junction" }
+    ],
+    "metrics": {
+      "vegetation_ndvi": 0.22,
+      "vegetation_status": "Low",
+      "flood_waterlogging_index": 20,
+      "flood_status": "Normal",
+      "encroachment_risk": 30,
+      "rainfall_last_24h_mm": 18.0,
+      "water_level_gauge_m": 196.4,
+      "culvert_flow_efficiency": 90
+    },
+    "risk_breakdown": {
+      "vegetation": 5,
+      "flooding": 9,
+      "encroachment": 5,
+      "web_intelligence": 10,
+      "citizen_reports": 0
+    },
+    "alerts": []
+  }
+]
+
